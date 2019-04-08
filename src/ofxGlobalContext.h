@@ -171,20 +171,20 @@ public:
 	T* getContext()
 	{
 		TYPE_ID class_id = RTTI<T>::value();
-		if (contexts.find(class_id) == contexts.end())
+		if (contexts_map.find(class_id) == contexts_map.end())
 		{
 			ofLogError("Manager") << "invalid context classname";
 			throw;
 			return NULL;
 		}
-		return (T*) contexts[class_id].get();
+		return (T*)contexts_map[class_id].get();
 	}
 	
 public:
 	
 	void update()
 	{
-		map<TYPE_ID, Context::Ref>::iterator it = contexts.begin();
+		auto it = contexts.begin();
 		while (it != contexts.end())
 		{
 			it->second->update();
@@ -206,7 +206,8 @@ protected:
 		}
 	};
 
-	map<TYPE_ID, Context::Ref> contexts;
+	vector< pair<TYPE_ID, Context::Ref> > contexts;
+	map<TYPE_ID, Context::Ref> contexts_map;
 	
 private:
 	
@@ -220,7 +221,8 @@ private:
 	{
 		Context::Ref o = Context::Ref(p);
 		TYPE_ID class_id = RTTI<T>::value();
-		contexts[class_id] = o;
+		contexts.emplace_back(make_pair(class_id, o));
+		contexts_map[class_id] = o;
 		return p;
 	}
 
